@@ -822,6 +822,7 @@
 			interrupts = <GIC_SPI 37 IRQ_TYPE_LEVEL_HIGH>;
 			gpio-controller;
 			little-endian;
+			lx2160-platform;
 			#gpio-cells = <2>;
 			interrupt-controller;
 			#interrupt-cells = <2>;
@@ -858,21 +859,18 @@
 			snps,dis_rxdet_inp3_quirk;
 			snps,incr-burst-type-adjustment = <1>, <4>, <8>, <16>;
 			snps,host-vbus-glitches;
-			dma-coherent;
-			status = "disabled";
 		};
 
 		usb1: usb@3110000 {
 			compatible = "fsl,lx2160a-dwc3", "snps,dwc3";
 			reg = <0x0 0x3110000 0x0 0x10000>;
 			interrupts = <GIC_SPI 81 IRQ_TYPE_LEVEL_HIGH>;
-			dr_mode = "host";
+			dr_mode = "peripheral";
+			maximum-speed = "super-speed";
 			snps,quirk-frame-length-adjustment = <0x20>;
 			snps,dis_rxdet_inp3_quirk;
 			snps,incr-burst-type-adjustment = <1>, <4>, <8>, <16>;
 			snps,host-vbus-glitches;
-			dma-coherent;
-			status = "disabled";
 		};
 
 		smmu: iommu@5000000 {
@@ -1167,7 +1165,6 @@
 			bus-range = <0x0 0xff>;
 			ranges = <0x82000000 0x0 0x40000000 0x80 0x40000000 0x0 0x40000000>; /* non-prefetchable memory */
 			msi-parent = <&its>;
-			iommu-map = <0 &smmu 0 1>; /* This is fixed-up by u-boot */
 			#interrupt-cells = <1>;
 			interrupt-map-mask = <0 0 0 7>;
 			interrupt-map = <0000 0 0 1 &gic 0 0 GIC_SPI 109 IRQ_TYPE_LEVEL_HIGH>,
@@ -1175,6 +1172,9 @@
 					<0000 0 0 3 &gic 0 0 GIC_SPI 111 IRQ_TYPE_LEVEL_HIGH>,
 					<0000 0 0 4 &gic 0 0 GIC_SPI 112 IRQ_TYPE_LEVEL_HIGH>;
 			status = "disabled";
+			pcie_rc1: pcie_rc1@0,0 {
+				reg = <0 0 0 0 0>;
+			};
 		};
 
 		pcie_ep@3400000 {
@@ -1204,7 +1204,6 @@
 			bus-range = <0x0 0xff>;
 			ranges = <0x82000000 0x0 0x40000000 0x88 0x40000000 0x0 0x40000000>; /* non-prefetchable memory */
 			msi-parent = <&its>;
-			iommu-map = <0 &smmu 0 1>; /* This is fixed-up by u-boot */
 			#interrupt-cells = <1>;
 			interrupt-map-mask = <0 0 0 7>;
 			interrupt-map = <0000 0 0 1 &gic 0 0 GIC_SPI 114 IRQ_TYPE_LEVEL_HIGH>,
@@ -1212,6 +1211,9 @@
 					<0000 0 0 3 &gic 0 0 GIC_SPI 116 IRQ_TYPE_LEVEL_HIGH>,
 					<0000 0 0 4 &gic 0 0 GIC_SPI 117 IRQ_TYPE_LEVEL_HIGH>;
 			status = "disabled";
+			pcie_rc2: pcie_rc2@0,0 {
+				reg = <0 0 0 0 0>;
+			};
 		};
 
 		pcie_ep@3500000 {
@@ -1236,19 +1238,25 @@
 			#size-cells = <2>;
 			device_type = "pci";
 			dma-coherent;
+			num-lanes = <8>;
 			apio-wins = <8>;
 			ppio-wins = <8>;
 			bus-range = <0x0 0xff>;
 			ranges = <0x82000000 0x0 0x40000000 0x90 0x40000000 0x0 0x40000000>; /* non-prefetchable memory */
 			msi-parent = <&its>;
-			iommu-map = <0 &smmu 0 1>; /* This is fixed-up by u-boot */
+			msi-map = <0x100 &its 0x1801 1>;
+			msi-map-mask = <0xffffffff>;
+			iommu-map = <0 &smmu 0 1>,
+			<0x100 &smmu 1 1>;
 			#interrupt-cells = <1>;
 			interrupt-map-mask = <0 0 0 7>;
 			interrupt-map = <0000 0 0 1 &gic 0 0 GIC_SPI 119 IRQ_TYPE_LEVEL_HIGH>,
 					<0000 0 0 2 &gic 0 0 GIC_SPI 120 IRQ_TYPE_LEVEL_HIGH>,
 					<0000 0 0 3 &gic 0 0 GIC_SPI 121 IRQ_TYPE_LEVEL_HIGH>,
 					<0000 0 0 4 &gic 0 0 GIC_SPI 122 IRQ_TYPE_LEVEL_HIGH>;
-			status = "disabled";
+			pcie_rc3: pcie_rc3@0,0 {
+				reg = <0 0 0 0 0>;
+			};
 		};
 
 		pcie_ep@3600000 {
@@ -1279,7 +1287,6 @@
 			bus-range = <0x0 0xff>;
 			ranges = <0x82000000 0x0 0x40000000 0x98 0x40000000 0x0 0x40000000>; /* non-prefetchable memory */
 			msi-parent = <&its>;
-			iommu-map = <0 &smmu 0 1>; /* This is fixed-up by u-boot */
 			#interrupt-cells = <1>;
 			interrupt-map-mask = <0 0 0 7>;
 			interrupt-map = <0000 0 0 1 &gic 0 0 GIC_SPI 124 IRQ_TYPE_LEVEL_HIGH>,
@@ -1287,6 +1294,9 @@
 					<0000 0 0 3 &gic 0 0 GIC_SPI 126 IRQ_TYPE_LEVEL_HIGH>,
 					<0000 0 0 4 &gic 0 0 GIC_SPI 127 IRQ_TYPE_LEVEL_HIGH>;
 			status = "disabled";
+			pcie_rc4: pcie_rc4@0,0 {
+				reg = <0 0 0 0 0>;
+			};
 		};
 
 		pcie_ep@3700000 {
@@ -1316,7 +1326,6 @@
 			bus-range = <0x0 0xff>;
 			ranges = <0x82000000 0x0 0x40000000 0xa0 0x40000000 0x0 0x40000000>; /* non-prefetchable memory */
 			msi-parent = <&its>;
-			iommu-map = <0 &smmu 0 1>; /* This is fixed-up by u-boot */
 			#interrupt-cells = <1>;
 			interrupt-map-mask = <0 0 0 7>;
 			interrupt-map = <0000 0 0 1 &gic 0 0 GIC_SPI 129 IRQ_TYPE_LEVEL_HIGH>,
@@ -1324,6 +1333,9 @@
 					<0000 0 0 3 &gic 0 0 GIC_SPI 131 IRQ_TYPE_LEVEL_HIGH>,
 					<0000 0 0 4 &gic 0 0 GIC_SPI 132 IRQ_TYPE_LEVEL_HIGH>;
 			status = "disabled";
+			pcie_rc5: pcie_rc5@0,0 {
+				reg = <0 0 0 0 0>;
+			};
 		};
 
 		pcie_ep@3800000 {
@@ -1354,7 +1366,6 @@
 			bus-range = <0x0 0xff>;
 			ranges = <0x82000000 0x0 0x40000000 0xa8 0x40000000 0x0 0x40000000>; /* non-prefetchable memory */
 			msi-parent = <&its>;
-			iommu-map = <0 &smmu 0 1>; /* This is fixed-up by u-boot */
 			#interrupt-cells = <1>;
 			interrupt-map-mask = <0 0 0 7>;
 			interrupt-map = <0000 0 0 1 &gic 0 0 GIC_SPI 104 IRQ_TYPE_LEVEL_HIGH>,
@@ -1362,6 +1373,9 @@
 					<0000 0 0 3 &gic 0 0 GIC_SPI 106 IRQ_TYPE_LEVEL_HIGH>,
 					<0000 0 0 4 &gic 0 0 GIC_SPI 107 IRQ_TYPE_LEVEL_HIGH>;
 			status = "disabled";
+			pcie_rc6: pcie_rc6@0,0 {
+				reg = <0 0 0 0 0>;
+			};
 		};
 
 		pcie_ep@3900000 {
@@ -1373,6 +1387,27 @@
 			status = "disabled";
 		};
 
+	};
+
+	pps {
+		gpios = <&gpio3 21 0>;
+		assert-falling-edge;
+		compatible = "pps-gpio";
+		status = "okay";
+	};
+
+	tti {
+		gpios = <&gpio3 23 0>;
+		assert-falling-edge;
+		compatible = "tti-gpio";
+		status = "okay";
+	};
+
+	qcom,fsm-dp {
+		compatible = "qcom,fsm-dp";
+		qcom,ul-bufs = <16320 4096>;
+		qcom,rx-queue-size = <1024 1024 1024 1024>;
+		dma-coherent;
 	};
 
 	firmware {
